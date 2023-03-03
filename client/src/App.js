@@ -12,7 +12,7 @@ import axios from 'axios'
 
 const App = () => {
   // ! State 
-  const [events, setEvents] = useState('')
+  const [products, setProducts] = useState('')
   const [location, setLocation] = useState('')
   const [errors, setErrors] = useState('')
   const [formData, setFormData] = useState({
@@ -25,14 +25,14 @@ const App = () => {
     const getData = async () => {
       const { data } = await axios.get(' https://global.atdtravel.com/api/products?geo=en') 
       console.log(data)
-      setEvents(data)
+      setProducts(data)
     }
     getData()
   }, [])
 
   return ( 
     <h1>Product Search</h1>
-
+    
   ) 
 }
 
