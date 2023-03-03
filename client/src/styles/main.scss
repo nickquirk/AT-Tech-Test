@@ -11,16 +11,17 @@
   max-width: 100%;
   .list-group{
     display: flex;
-    flex-direction: column;
-    justify-content: space-around;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
   img{
     max-width: 150px;
   }
   .product-title{
-    max-width: 200px;
+    //max-width: 200px;
   }
   .product-destination{
-    max-width: 200px;
+    //max-width: 200px;
   }
 }
