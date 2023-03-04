@@ -8,34 +8,59 @@ import { Container, Row, Col, Form, Button, ListGroup, ListGroupItem } from 'rea
 import axios from 'axios'
 
 // TODO
-// - get data 
 // - replace region based on drop-down
-// - replace title based on search parameter 
 // - use offset for pagination 
+// - error handling 
+//    - 404
+// - spinner for loading 
 
 const App = () => {
   // ! State 
-  const [products, setProducts] = useState('')
-  const [location, setLocation] = useState('')
+  const [products, setProducts] = useState([])
   const [errors, setErrors] = useState('')
   const [formData, setFormData] = useState({
-    search: '',
+    title: '',
     region: '',
   })
 
   // ! Execution 
+  // fetch default data from API
   useEffect(() => {
     const getData = async () => {
-      const { data } = await axios.get(' https://global.atdtravel.com/api/products?geo=en') 
+      const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en') 
       console.log(data)
       setProducts(data)
     }
     getData()
   }, [])
 
+  useEffect(() => {
+    console.log(formData)
+  }, [formData])
+
+  // call API with user search results 
+  const getSearchData = async () => {
+    const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`) 
+    console.log(data)
+    setProducts(data)
+  }
+
+  // update form data with user input
   const handleChange = (e) => {
-    console.log(e.target.value)
-    setLocation(e.target.value)
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleRegionChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+    getSearchData()
+  }
+
+  // Submit user input and call API 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    getSearchData()
+    console.log('form submitted')
+    setProducts('')
   }
 
 
@@ -45,7 +70,7 @@ const App = () => {
         <h1>Product Search</h1>
       </Row>
       <Row>
-        <Form>
+        <Form onSubmit={handleSubmit}>
           <Row>
             <Form.Group as={Row} className='search-form'>
               <Col sm={2}>
@@ -54,9 +79,18 @@ const App = () => {
                 </Form.Label>
               </Col>
               <Col>
-                <Form.Control type='text' onChange={handleChange}/>
+                <Form.Control name='title' type='text' value={formData.title} onChange={handleChange}/>
               </Col>
             </Form.Group>
+            <Col>
+              <Form.Group>
+                <Form.Select name='region' className='region-select' value={formData.region} onChange={handleRegionChange}>
+                  <option value='en'>UK</option>
+                  <option value='en-ir'>Ireland</option>
+                  <option value='de-de'>Germany</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
             <Col>
               <Button type='submit'>Submit</Button>
             </Col>
@@ -64,17 +98,26 @@ const App = () => {
         </Form>
       </Row>
       <ListGroup className='product-list'>
-        <ListGroupItem className='list-group'>
-          <div>
-            <img className='product-image' src='https://res.cloudinary.com/dhjguxvm1/image/upload/v1669369462/sample.jpg' ></img>
-          </div>
-          <div className='product-title'>
-            <h4>Title</h4>
-          </div>
-          <div className='product-destination'>
-            <h4>Destination</h4>
-          </div>
-        </ListGroupItem>
+        { products.data ? 
+          products.data.map(product => {
+            const { id, title, dest } = product
+            return (
+              <ListGroupItem key={id} className='list-group'>
+                <div>
+                  <img className='product-image' src={product.img_sml}></img>
+                </div>
+                <div className='product-title'>
+                  <p>{title}</p>
+                </div>
+                <div className='product-destination'>
+                  <p>{dest}</p>
+                </div>
+              </ListGroupItem>
+            )
+          })
+          :
+          <p>Loading...</p>
+        }
       </ListGroup>
     </Container> 
   ) 
