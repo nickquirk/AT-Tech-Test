@@ -8,11 +8,16 @@ import { Container, Row, Col, Form, Button, ListGroup, ListGroupItem } from 'rea
 import axios from 'axios'
 
 // TODO
-// - replace region based on drop-down
 // - use offset for pagination 
+//    - limit parameter to change number of reults per page 
 // - error handling 
+// - try/catch blocks 
 //    - 404
 // - spinner for loading 
+
+// ? Styling
+// portrait for pics 
+// align description text left 
 
 const App = () => {
   // ! State 
@@ -20,7 +25,7 @@ const App = () => {
   const [errors, setErrors] = useState('')
   const [formData, setFormData] = useState({
     title: '',
-    region: '',
+    region: 'en',
   })
 
   // ! Execution 
@@ -50,6 +55,7 @@ const App = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  // update region and call API
   const handleRegionChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
     getSearchData()
@@ -73,7 +79,7 @@ const App = () => {
         <Form onSubmit={handleSubmit}>
           <Row>
             <Form.Group as={Row} className='search-form'>
-              <Col sm={2}>
+              <Col sm={2} className='form-title'>
                 <Form.Label>
                     Title
                 </Form.Label>
@@ -83,16 +89,20 @@ const App = () => {
               </Col>
             </Form.Group>
             <Col>
+              <Button type='submit'>Submit</Button>
+            </Col>
+            <Col>
               <Form.Group>
-                <Form.Select name='region' className='region-select' value={formData.region} onChange={handleRegionChange}>
+                <Form.Select 
+                  name='region' 
+                  className='region-select' 
+                  value={formData.region} 
+                  onChange={handleRegionChange}>
                   <option value='en'>UK</option>
-                  <option value='en-ir'>Ireland</option>
+                  <option value='en-ie'>Ireland</option>
                   <option value='de-de'>Germany</option>
                 </Form.Select>
               </Form.Group>
-            </Col>
-            <Col>
-              <Button type='submit'>Submit</Button>
             </Col>
           </Row>
         </Form>

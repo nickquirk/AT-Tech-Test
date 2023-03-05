@@ -2,6 +2,11 @@
   box-sizing: border-box;
 }
 
+.form-title{
+  display: flex;
+  align-items: center;
+}
+
 .search-form{
   max-width: 500px;
 }
@@ -23,7 +28,7 @@
     max-width: 150px;
   }
   .product-title{
-    //max-width: 200px;
+    
   }
   .product-destination{
     //max-width: 200px;
