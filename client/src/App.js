@@ -79,6 +79,7 @@ const App = () => {
     e.preventDefault()
     getSearchData()
     console.log('form submitted')
+    setErrors(false) // clear error state
     setProducts('') // set products to '' so that loading spinner shows
   }
 
@@ -153,7 +154,6 @@ const App = () => {
                 <p>Loading...</p>
               </div>
           }
-
         </tbody>
       </Table>
     </Container>
