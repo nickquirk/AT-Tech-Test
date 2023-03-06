@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+.error{
+  color: red;
+}
+
 .form-title{
   display: flex;
   align-items: center;
@@ -9,6 +13,7 @@
 
 .search-form{
   max-width: 500px;
+  align-items: center;
 }
 
 .region-select{
@@ -33,5 +38,15 @@
   .product-destination{
     //max-width: 200px;
   }
+}
+
+.product-image{
+  max-width: 150px;
+}
+
+.messages{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 

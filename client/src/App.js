@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 
 // Bootstrap Imports 
-import { Container, Row, Col, Form, Button, ListGroup, ListGroupItem } from 'react-bootstrap'
+import { Container, Row, Col, Form, Button, ListGroup, ListGroupItem, Table } from 'react-bootstrap'
 
 // Imports
 import axios from 'axios'
@@ -14,6 +14,8 @@ import axios from 'axios'
 // - try/catch blocks 
 //    - 404
 // - spinner for loading 
+// - Titles above list 
+// - Remake with table rather than List group 
 
 // ? Styling
 // portrait for pics 
@@ -22,7 +24,8 @@ import axios from 'axios'
 const App = () => {
   // ! State 
   const [products, setProducts] = useState([])
-  const [errors, setErrors] = useState('')
+  const [errors, setErrors] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     region: 'en',
@@ -32,22 +35,36 @@ const App = () => {
   // fetch default data from API
   useEffect(() => {
     const getData = async () => {
-      const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en') 
-      console.log(data)
-      setProducts(data)
+      try {
+        const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en') 
+        console.log(data)
+        setProducts(data)
+        setErrors(false) // clear error state
+      } catch (err) {
+        console.log(err)
+        setErrors(true)
+        setErrorMessage(err.message)
+      }
     }
     getData()
   }, [])
 
   useEffect(() => {
-    console.log(formData)
+    //console.log(formData)
   }, [formData])
 
   // call API with user search results 
   const getSearchData = async () => {
-    const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`) 
-    console.log(data)
-    setProducts(data)
+    try {
+      const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`) 
+      console.log(data)
+      setProducts(data)
+      setErrors(false) // clear error state
+    } catch (err) {
+      console.log(err.message)
+      setErrors(true)
+      setErrorMessage(err.message)
+    }
   }
 
   // update form data with user input
@@ -66,7 +83,7 @@ const App = () => {
     e.preventDefault()
     getSearchData()
     console.log('form submitted')
-    setProducts('')
+    setProducts('') // set products to '' so that loading spinner shows
   }
 
 
@@ -93,15 +110,20 @@ const App = () => {
             </Col>
             <Col>
               <Form.Group>
-                <Form.Select 
-                  name='region' 
-                  className='region-select' 
-                  value={formData.region} 
-                  onChange={handleRegionChange}>
-                  <option value='en'>UK</option>
-                  <option value='en-ie'>Ireland</option>
-                  <option value='de-de'>Germany</option>
-                </Form.Select>
+                <Form.Label>
+                    Region
+                </Form.Label>
+                <Col>
+                  <Form.Select 
+                    name='region' 
+                    className='region-select' 
+                    value={formData.region} 
+                    onChange={handleRegionChange}>
+                    <option value='en'>UK</option>
+                    <option value='en-ie'>Ireland</option>
+                    <option value='de-de'>Germany</option>
+                  </Form.Select>
+                </Col>
               </Form.Group>
             </Col>
           </Row>
@@ -125,10 +147,38 @@ const App = () => {
               </ListGroupItem>
             )
           })
-          :
-          <p>Loading...</p>
+          : errors ?
+            <div className='messages'>
+              <p>Oops, looks like there&apos;s an error...</p>
+              <p className='error'>{errorMessage}</p>
+            </div>
+            : 
+            <div className='messages'>
+              <p>Loading...</p>
+            </div>
         }
       </ListGroup>
+      <Table striped border hover>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Destination</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><img className='product-image' src='https://res.cloudinary.com/dhjguxvm1/image/upload/v1669369462/sample.jpg'/></td>
+            <td>I&apos;m baby crucifix cloud bread heirloom jianbing fit selvage affogato chia gatekeep. Cray prism listicle fashion axe, </td>
+            <td>London</td>
+          </tr>
+          <tr>
+            <td><img className='product-image' src='https://res.cloudinary.com/dhjguxvm1/image/upload/v1669369462/sample.jpg'/></td>
+            <td>Title here....</td>
+            <td>London</td>
+          </tr>
+        </tbody>
+      </Table>
     </Container> 
   ) 
 }
