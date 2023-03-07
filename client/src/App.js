@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 
 // Bootstrap Imports 
-import { Container, Row, Col, Form, Button, ListGroup, ListGroupItem, Table } from 'react-bootstrap'
+import { Container, Row, Col, Form, Button, Table, Pagination } from 'react-bootstrap'
 
 // Imports
 import axios from 'axios'
@@ -11,13 +11,15 @@ import axios from 'axios'
 // - use offset for pagination 
 //    - limit parameter to change number of reults per page 
 // - spinner for loading 
-// - Remake with table rather than List group 
 
 // ? Styling
 // portrait for pics 
-// align description text left 
+// colour things correct colour : buttons etc...
 
 const App = () => {
+  // ! Variables
+  const ITEMS_PER_PAGE = 10
+
   // ! State 
   const [products, setProducts] = useState([])
   const [errors, setErrors] = useState(false)
@@ -26,16 +28,25 @@ const App = () => {
     title: '',
     region: 'en',
   })
+  // Pagination 
+  const [totalItems, setTotalItems] = useState('')
+  const [totalPages, setTotalPages] = useState('')
+  const [totalCount, setTotalCount] = useState('')
+  const [items, setItems] = useState([])
+  const [displayItems, setDisplayItems] = useState([])
+  const [activePage, setActivePage] = useState(1)
+  
+    
 
   // ! Execution 
   // fetch default data from API
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await axios.get('https://global1.atdtravel.com/api/products?geo=en')
-        console.log(data)
-        setProducts(data)
+        const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en')
+        console.log('data from generic API call ->', data)
         setErrors(false) // clear error state
+        setProducts(data)
       } catch (err) {
         console.log(err)
         setErrors(true)
@@ -45,17 +56,20 @@ const App = () => {
     getData()
   }, [])
 
+
+  // Call paginate function when relevant details change 
   useEffect(() => {
-    //console.log(formData)
-  }, [formData])
+    products ? handlePagination() : ''
+    console.log('useEffect products', products)
+  }, [activePage, ITEMS_PER_PAGE, products])
 
   // call API with user search results 
   const getSearchData = async () => {
     try {
-      const { data } = await axios.get(`https://global1.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`)
-      console.log(data)
-      setProducts(data)
+      const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`)
+      console.log('data from custom API call ->', data)
       setErrors(false) // clear error state
+      setProducts(data)
     } catch (err) {
       console.log(err.message)
       setErrors(true)
@@ -82,6 +96,33 @@ const App = () => {
     setErrors(false) // clear error state
     setProducts('') // set products to '' so that loading spinner shows
   }
+
+  // Pagination for product results 
+  const handlePagination = () => {
+    const totalCount = products.meta ? products.meta.total_count : '' // get total number of products from API call
+    console.log('total count ->', totalCount)
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+    setTotalItems(totalCount) // set total number of items
+    console.log('total pages ->', totalPages)
+    const startIndex = (activePage - 1) * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+    const paginatedItems = []
+    for (let number = 1; number <= totalCount; number++) {
+      paginatedItems.push(
+        <Pagination.Item
+          key={number}
+          active={number === activePage}
+          onClick={() => setActivePage(number)}
+        >
+          {number}
+        </Pagination.Item>
+      )
+    }
+    setItems(paginatedItems)
+    setDisplayItems(items.slice(startIndex, endIndex))
+  }
+
+  
 
 
   return (
@@ -156,6 +197,10 @@ const App = () => {
           }
         </tbody>
       </Table>
+      <div>
+        {displayItems}
+        <Pagination>{items}</Pagination>
+      </div>
     </Container>
   )
 }
