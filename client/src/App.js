@@ -35,7 +35,7 @@ const App = () => {
   const [items, setItems] = useState([])
   const [displayItems, setDisplayItems] = useState([])
   const [activePage, setActivePage] = useState(1)
-  
+  const [offset, setOffset] = useState(0)
     
 
   // ! Execution 
@@ -77,6 +77,25 @@ const App = () => {
     }
   }
 
+  // call API when offset value changes 
+  useEffect(() => {
+    setProducts('')
+    const updateOffset = async () => {
+      try {
+        const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}&offset=${offset}`)
+        console.log('data from offset API call ->', data)
+        setErrors(false) // clear error state
+        setProducts(data)
+      } catch (err) {
+        console.log(err.message)
+        setErrors(true)
+        setErrorMessage(err.message)
+      }
+    }
+    updateOffset()
+  }, [offset])
+  
+
   // update form data with user input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -99,14 +118,20 @@ const App = () => {
 
   // Pagination for product results 
   const handlePagination = () => {
-    const totalCount = products.meta ? products.meta.total_count : '' // get total number of products from API call
+    // TODO
+    // handle offset - recall API with offset = page no * items per page
+    // dynamically create pagination numbers based on num pages 
+
+
+    const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
     console.log('total count ->', totalCount)
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
-    setTotalItems(totalCount) // set total number of items
     console.log('total pages ->', totalPages)
+
     const startIndex = (activePage - 1) * ITEMS_PER_PAGE
     const endIndex = startIndex + ITEMS_PER_PAGE
     const paginatedItems = []
+
     for (let number = 1; number <= totalCount; number++) {
       paginatedItems.push(
         <Pagination.Item
@@ -118,11 +143,13 @@ const App = () => {
         </Pagination.Item>
       )
     }
+    const productOffset = (activePage * 10) - 10 // calculate required offset
+    setOffset(productOffset) // set API offset parameter 
+    setTotalItems(totalCount) // set total number of items
     setItems(paginatedItems)
     setDisplayItems(items.slice(startIndex, endIndex))
+    console.log('display items ->', displayItems)
   }
-
-  
 
 
   return (
@@ -198,7 +225,6 @@ const App = () => {
         </tbody>
       </Table>
       <div>
-        {displayItems}
         <Pagination>{items}</Pagination>
       </div>
     </Container>
