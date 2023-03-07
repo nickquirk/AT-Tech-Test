@@ -10,6 +10,8 @@ import axios from 'axios'
 // TODO
 // - use offset for pagination 
 //    - limit parameter to change number of reults per page 
+// set current page to 1 on reload 
+// recreate page num array on reload 
 // - spinner for loading 
 
 // ? Styling
@@ -31,12 +33,10 @@ const App = () => {
   // Pagination 
   const [totalItems, setTotalItems] = useState('')
   const [totalPages, setTotalPages] = useState('')
-  const [totalCount, setTotalCount] = useState('')
-  const [items, setItems] = useState([])
-  const [displayItems, setDisplayItems] = useState([])
-  const [activePage, setActivePage] = useState(1)
+  const [pageNumbers, setPageNumbers] = useState([])
   const [offset, setOffset] = useState(0)
-    
+  const [currentPage, setCurrentPage] = useState(1)
+
 
   // ! Execution 
   // fetch default data from API
@@ -47,6 +47,7 @@ const App = () => {
         console.log('data from generic API call ->', data)
         setErrors(false) // clear error state
         setProducts(data)
+        generatePageNumbers()
       } catch (err) {
         console.log(err)
         setErrors(true)
@@ -60,8 +61,15 @@ const App = () => {
   // Call paginate function when relevant details change 
   useEffect(() => {
     products ? handlePagination() : ''
-    console.log('useEffect products', products)
-  }, [activePage, ITEMS_PER_PAGE, products])
+    console.log('currentPage -> ', currentPage)
+    generatePageNumbers()
+  }, [currentPage, ITEMS_PER_PAGE, products])
+
+  // update offset parameter when page changes
+  useEffect(() => {
+    setOffset((currentPage * 10) - 10)
+  }, [currentPage])
+
 
   // call API with user search results 
   const getSearchData = async () => {
@@ -70,6 +78,8 @@ const App = () => {
       console.log('data from custom API call ->', data)
       setErrors(false) // clear error state
       setProducts(data)
+      setCurrentPage(1)
+      generatePageNumbers()
     } catch (err) {
       console.log(err.message)
       setErrors(true)
@@ -94,7 +104,7 @@ const App = () => {
     }
     updateOffset()
   }, [offset])
-  
+
 
   // update form data with user input
   const handleChange = (e) => {
@@ -116,41 +126,44 @@ const App = () => {
     setProducts('') // set products to '' so that loading spinner shows
   }
 
+  const handleClick = (e) => {
+    const target = e.target.text
+    let activePage
+    if (target === '«') {
+      activePage = 1
+    } else if (target === '‹') {
+      activePage++
+    } else if (target === '›') {
+      activePage--
+    } else if (target === '»') {
+      activePage = totalPages
+    } else {
+      activePage = parseInt(target)
+    }
+    console.log('active page ->', activePage)
+    setCurrentPage(activePage)
+  }
+
+
   // Pagination for product results 
   const handlePagination = () => {
     // TODO
-    // handle offset - recall API with offset = page no * items per page
     // dynamically create pagination numbers based on num pages 
-
-
+    generatePageNumbers()
     const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
-    console.log('total count ->', totalCount)
-    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
+    setTotalItems(totalCount)
+    setTotalPages(Math.ceil(totalCount / ITEMS_PER_PAGE))
     console.log('total pages ->', totalPages)
-
-    const startIndex = (activePage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    const paginatedItems = []
-
-    for (let number = 1; number <= totalCount; number++) {
-      paginatedItems.push(
-        <Pagination.Item
-          key={number}
-          active={number === activePage}
-          onClick={() => setActivePage(number)}
-        >
-          {number}
-        </Pagination.Item>
-      )
-    }
-    const productOffset = (activePage * 10) - 10 // calculate required offset
-    setOffset(productOffset) // set API offset parameter 
-    setTotalItems(totalCount) // set total number of items
-    setItems(paginatedItems)
-    setDisplayItems(items.slice(startIndex, endIndex))
-    console.log('display items ->', displayItems)
   }
 
+  // populate array to create page numbers 
+  const generatePageNumbers = () => {
+    const arr = []
+    for (let i = 1; i <= totalPages; i++) {
+      arr.push(i)
+    }
+    setPageNumbers(arr)
+  }
 
   return (
     <Container>
@@ -224,8 +237,27 @@ const App = () => {
           }
         </tbody>
       </Table>
-      <div>
-        <Pagination>{items}</Pagination>
+      <div className='page-number'>
+        <p>page {currentPage} of {totalPages}</p>
+      </div>
+      <div className='pagination'>
+        <Pagination>
+          <Pagination.First onClick={() => setCurrentPage(1)} />
+          <Pagination.Prev onClick={() => currentPage > 1 ? setCurrentPage(currentPage - 1) : setCurrentPage(1)} />
+          {pageNumbers
+            .filter((page) => page >= currentPage - 3 && page <= currentPage + 4)
+            .map((page) => (
+              <Pagination.Item
+                key={page}
+                active={page === currentPage}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </Pagination.Item>
+            ))}
+          <Pagination.Next onClick={() => currentPage < totalPages ? setCurrentPage(currentPage + 1) : setCurrentPage(totalPages)} />
+          <Pagination.Last onClick={() => setCurrentPage(totalPages)} />
+        </Pagination>
       </div>
     </Container>
   )
