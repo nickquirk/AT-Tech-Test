@@ -8,11 +8,8 @@ import { Container, Row, Col, Form, Button, Table, Pagination } from 'react-boot
 import axios from 'axios'
 
 // TODO
-// - use offset for pagination 
-//    - limit parameter to change number of reults per page 
-// set current page to 1 on reload 
-// recreate page num array on reload 
 // - spinner for loading 
+// -  update state on price in real time 
 
 // ? Styling
 // portrait for pics 
@@ -31,7 +28,6 @@ const App = () => {
     region: 'en',
   })
   // Pagination 
-  const [totalItems, setTotalItems] = useState('')
   const [totalPages, setTotalPages] = useState('')
   const [pageNumbers, setPageNumbers] = useState([])
   const [offset, setOffset] = useState(0)
@@ -126,24 +122,6 @@ const App = () => {
     setProducts('') // set products to '' so that loading spinner shows
   }
 
-  const handleClick = (e) => {
-    const target = e.target.text
-    let activePage
-    if (target === '«') {
-      activePage = 1
-    } else if (target === '‹') {
-      activePage++
-    } else if (target === '›') {
-      activePage--
-    } else if (target === '»') {
-      activePage = totalPages
-    } else {
-      activePage = parseInt(target)
-    }
-    console.log('active page ->', activePage)
-    setCurrentPage(activePage)
-  }
-
 
   // Pagination for product results 
   const handlePagination = () => {
@@ -151,7 +129,6 @@ const App = () => {
     // dynamically create pagination numbers based on num pages 
     generatePageNumbers()
     const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
-    setTotalItems(totalCount)
     setTotalPages(Math.ceil(totalCount / ITEMS_PER_PAGE))
     console.log('total pages ->', totalPages)
   }
@@ -211,6 +188,7 @@ const App = () => {
             <th>Image</th>
             <th>Title</th>
             <th>Destination</th>
+            <th>Price from</th>
           </tr>
         </thead>
         <tbody>
@@ -222,6 +200,7 @@ const App = () => {
                   <td><img className='product-image' src={product.img_sml} /></td>
                   <td>{title}</td>
                   <td>{dest}</td>
+                  <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult}</td>
                 </tr>
               )
             })
