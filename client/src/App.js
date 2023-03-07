@@ -9,7 +9,9 @@ import axios from 'axios'
 
 // TODO
 // - spinner for loading 
+// ? STATE
 // -  update state on price in real time 
+// update number array on each reload/update
 
 // ? Styling
 // portrait for pics 
@@ -200,7 +202,7 @@ const App = () => {
                   <td><img className='product-image' src={product.img_sml} /></td>
                   <td>{title}</td>
                   <td>{dest}</td>
-                  <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult}</td>
+                  <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult !== '0.00' ? product.price_from_adult : 'N/A'}</td>
                 </tr>
               )
             })
