@@ -1,7 +1,7 @@
 
 # AT-Tech-Test
 
-A technical test for Attraction Tickets. Frontend that consumes the AT API and allows navigation of products based on search criteria. 
+A technical test for Attraction Tickets. Simple frontend that consumes the AT public API and allows navigation of products based on search criteria. 
 
 
 
