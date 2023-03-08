@@ -18,16 +18,15 @@ import axios from 'axios'
 // colour things correct colour : buttons etc...
 
 const App = () => {
-  // ! Variables
-  const ITEMS_PER_PAGE = 10
-
   // ! State 
   const [products, setProducts] = useState([])
   const [errors, setErrors] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [formData, setFormData] = useState({
     title: '',
     region: 'en',
+    productNumber: 10,
   })
   // Pagination 
   const [totalPages, setTotalPages] = useState('')
@@ -58,10 +57,9 @@ const App = () => {
 
   // Call paginate function when relevant details change 
   useEffect(() => {
-    products ? handlePagination() : ''
     console.log('currentPage -> ', currentPage)
     generatePageNumbers()
-  }, [currentPage, ITEMS_PER_PAGE, products])
+  }, [currentPage, itemsPerPage, products])
 
   // update offset parameter when page changes
   useEffect(() => {
@@ -85,12 +83,13 @@ const App = () => {
     }
   }
 
-  // call API when offset value changes 
+  // call API when offset or form values changes 
   useEffect(() => {
     setProducts('')
-    const updateOffset = async () => {
+    const updateProducts = async () => {
       try {
-        const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}&offset=${offset}`)
+        const { region, title, productNumber } = formData
+        const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${region}&title=${title}&offset=${offset}&limit=${productNumber}`)
         console.log('data from offset API call ->', data)
         setErrors(false) // clear error state
         setProducts(data)
@@ -100,19 +99,16 @@ const App = () => {
         setErrorMessage(err.message)
       }
     }
-    updateOffset()
-  }, [offset])
+    updateProducts()
+    generatePageNumbers()
+  }, [offset, formData.region, formData.productNumber])
 
 
   // update form data with user input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  // update region and call API
-  const handleRegionChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-    getSearchData()
+    console.log('name ->', e.target.name)
+    console.log('value ->', e.target.value)
   }
 
   // Submit user input and call API 
@@ -124,24 +120,16 @@ const App = () => {
     setProducts('') // set products to '' so that loading spinner shows
   }
 
-
-  // Pagination for product results 
-  const handlePagination = () => {
-    // TODO
-    // dynamically create pagination numbers based on num pages 
-    generatePageNumbers()
-    const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
-    setTotalPages(Math.ceil(totalCount / ITEMS_PER_PAGE))
-    console.log('total pages ->', totalPages)
-  }
-
   // populate array to create page numbers 
   const generatePageNumbers = () => {
+    const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
+    const totalPageAmount = Math.ceil(totalCount / parseInt(formData.productNumber))
     const arr = []
-    for (let i = 1; i <= totalPages; i++) {
+    for (let i = 1; i <= totalPageAmount; i++) {
       arr.push(i)
     }
     setPageNumbers(arr)
+    setTotalPages(totalPageAmount)
   }
 
   return (
@@ -149,7 +137,7 @@ const App = () => {
       <Row>
         <h1>Product Search</h1>
       </Row>
-      <Row>
+      <Row className='mt-4'>
         <Form onSubmit={handleSubmit}>
           <Row>
             <Form.Group as={Row} className='search-form'>
@@ -165,16 +153,18 @@ const App = () => {
             <Col className='d-flex align-items-center'>
               <Button type='submit'>Submit</Button>
             </Col>
-            <Col className='d-flex align-items-center'>
+            <Col className='region-select'>
               <Form.Label>
                 Region
               </Form.Label>
+            </Col>
+            <Col>
               <Form.Group>
                 <Form.Select
                   name='region'
-                  className='region-select'
+                  // className='region-select'
                   value={formData.region}
-                  onChange={handleRegionChange}>
+                  onChange={handleChange}>
                   <option value='en'>UK</option>
                   <option value='en-ie'>Ireland</option>
                   <option value='de-de'>Germany</option>
@@ -182,9 +172,28 @@ const App = () => {
               </Form.Group>
             </Col>
           </Row>
+          <Row className='product-number mt-2'>
+            <Col sm={2}>
+              <Form.Label>
+                Products per page
+              </Form.Label>
+            </Col>
+            <Col sm={2}>
+              <Form.Group>
+                <Form.Select
+                  name='productNumber'
+                  value={formData.productNumber}
+                  onChange={handleChange}>
+                  <option value='10'>10</option>
+                  <option value='20'>20</option>
+                  <option value='50'>50</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
         </Form>
       </Row>
-      <Table striped hover>
+      <Table striped hover className='mt-2'>
         <thead>
           <tr>
             <th>Image</th>
@@ -193,30 +202,33 @@ const App = () => {
             <th>Price from</th>
           </tr>
         </thead>
-        <tbody>
-          {products.data ?
-            products.data.map(product => {
-              const { id, title, dest } = product
-              return (
-                <tr key={id}>
-                  <td><img className='product-image' src={product.img_sml} /></td>
-                  <td>{title}</td>
-                  <td>{dest}</td>
-                  <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult !== '0.00' ? product.price_from_adult : 'N/A'}</td>
-                </tr>
-              )
-            })
-            : errors ?
-              <div className='messages'>
-                <p>Oops, looks like there&apos;s an error...</p>
-                <p className='error'>{errorMessage}</p>
-              </div>
-              :
-              <div className='messages'>
-                <p>Loading...</p>
-              </div>
-          }
-        </tbody>
+        {products.data ? (
+          <>
+            <tbody>
+              {products.data.map(product => {
+                const { id, title, dest } = product
+                return (
+                  <tr key={id}>
+                    <td><img className='product-image' src={product.img_sml} /></td>
+                    <td>{title}</td>
+                    <td>{dest}</td>
+                    <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult !== '0.00' ? product.price_from_adult : 'N/A'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </>
+        )
+          : errors ?
+            <div className='messages'>
+              <p>Oops, looks like there&apos;s an error...</p>
+              <p className='error'>{errorMessage}</p>
+            </div>
+            :
+            <div className='messages'>
+              <p>Loading...</p>
+            </div>
+        }
       </Table>
       <div className='page-number'>
         <p>page {currentPage} of {totalPages}</p>
