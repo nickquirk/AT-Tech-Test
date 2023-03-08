@@ -8,16 +8,6 @@ import { Container, Row, Col, Form, Button, Table, Pagination } from 'react-boot
 import axios from 'axios'
 import spinner from './assets/spinner.gif'
 
-// TODO
-// - spinner for loading 
-// ? STATE
-// -  update state on price in real time 
-// update number array on each reload/update
-
-// ? Styling
-// portrait for pics 
-// colour things correct colour : buttons etc...
-
 const App = () => {
   // ! State 
   const [products, setProducts] = useState([])
@@ -29,7 +19,7 @@ const App = () => {
     region: 'en',
     productNumber: 10,
   })
-  // Pagination 
+  // ? Pagination 
   const [totalPages, setTotalPages] = useState('')
   const [pageNumbers, setPageNumbers] = useState([])
   const [offset, setOffset] = useState(0)
@@ -42,7 +32,6 @@ const App = () => {
     const getData = async () => {
       try {
         const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en')
-        console.log('data from generic API call ->', data)
         setErrors(false) // clear error state
         setProducts(data)
         generatePageNumbers()
@@ -67,11 +56,10 @@ const App = () => {
   }, [currentPage])
 
 
-  // call API with user search results 
+  // call API with user search results when submit button is clicked
   const getSearchData = async () => {
     try {
       const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}&title=${formData.title}`)
-      console.log('data from custom API call ->', data)
       setErrors(false) // clear error state
       setProducts(data)
       setCurrentPage(1)
@@ -83,14 +71,13 @@ const App = () => {
     }
   }
 
-  // call API when offset or form values changes 
+  // call API when offset or region/no of products per page values changes 
   useEffect(() => {
     setProducts('')
     const updateProducts = async () => {
       try {
         const { region, title, productNumber } = formData
         const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${region}&title=${title}&offset=${offset}&limit=${productNumber}`)
-        console.log('data from offset API call ->', data)
         setErrors(false) // clear error state
         setProducts(data)
       } catch (err) {
@@ -121,7 +108,7 @@ const App = () => {
   // populate array to create page numbers 
   const generatePageNumbers = () => {
     const totalCount = products.meta ? products.meta.total_count : 0 // get total number of products from API call
-    const totalPageAmount = Math.ceil(totalCount / parseInt(formData.productNumber))
+    const totalPageAmount = Math.ceil(totalCount / parseInt(formData.productNumber)) // calculate total amount of pages
     const arr = []
     for (let i = 1; i <= totalPageAmount; i++) {
       arr.push(i)
@@ -130,6 +117,7 @@ const App = () => {
     setTotalPages(totalPageAmount)
   }
 
+  // ! JSX
   return (
     <Container>
       <Row>
