@@ -13,7 +13,6 @@ const App = () => {
   const [products, setProducts] = useState([])
   const [errors, setErrors] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [formData, setFormData] = useState({
     title: '',
     region: 'en',
@@ -25,16 +24,15 @@ const App = () => {
   const [offset, setOffset] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
 
-
   // ! Execution 
   // fetch default data from API
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await axios.get('https://global.atdtravel.com/api/products?geo=en')
+        const { data } = await axios.get(`https://global.atdtravel.com/api/products?geo=${formData.region}`)
         setErrors(false) // clear error state
         setProducts(data)
-        generatePageNumbers()
+        setCurrentPage(1)
       } catch (err) {
         console.log(err)
         setErrors(true)
@@ -44,17 +42,15 @@ const App = () => {
     getData()
   }, [])
 
-
   // Call paginate function when relevant details change 
   useEffect(() => {
     generatePageNumbers()
-  }, [currentPage, itemsPerPage, products])
+  }, [currentPage, formData.productNumber, products])
 
   // update offset parameter when page changes
   useEffect(() => {
     setOffset((currentPage * 10) - 10)
   }, [currentPage])
-
 
   // call API with user search results when submit button is clicked
   const getSearchData = async () => {
@@ -63,7 +59,6 @@ const App = () => {
       setErrors(false) // clear error state
       setProducts(data)
       setCurrentPage(1)
-      generatePageNumbers()
     } catch (err) {
       console.log(err.message)
       setErrors(true)
@@ -219,7 +214,7 @@ const App = () => {
           <Pagination.First onClick={() => setCurrentPage(1)} />
           <Pagination.Prev onClick={() => currentPage > 1 ? setCurrentPage(currentPage - 1) : setCurrentPage(1)} />
           {pageNumbers
-            .filter((page) => page >= currentPage - 3 && page <= currentPage + 4)
+            .filter((page) => page >= currentPage - 3 && page <= currentPage + 3)
             .map((page) => (
               <Pagination.Item
                 key={page}
