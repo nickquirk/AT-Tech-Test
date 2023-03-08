@@ -138,6 +138,26 @@ const App = () => {
         <h1>Product Search</h1>
       </Row>
       <Row className='mt-4'>
+        <Col className='region-select'>
+          <Form.Label>
+            Region
+          </Form.Label>
+        </Col>
+        <Col sm={2}>
+          <Form.Group>
+            <Form.Select
+              name='region'
+              // className='region-select'
+              value={formData.region}
+              onChange={handleChange}>
+              <option value='en'>UK</option>
+              <option value='en-ie'>Ireland</option>
+              <option value='de-de'>Germany</option>
+            </Form.Select>
+          </Form.Group>
+        </Col>
+      </Row>
+      <Row className='product-number mt-2'>
         <Form onSubmit={handleSubmit}>
           <Row>
             <Form.Group as={Row} className='search-form'>
@@ -153,26 +173,6 @@ const App = () => {
             <Col className='d-flex align-items-center'>
               <Button type='submit'>Submit</Button>
             </Col>
-            <Col className='region-select'>
-              <Form.Label>
-                Region
-              </Form.Label>
-            </Col>
-            <Col>
-              <Form.Group>
-                <Form.Select
-                  name='region'
-                  // className='region-select'
-                  value={formData.region}
-                  onChange={handleChange}>
-                  <option value='en'>UK</option>
-                  <option value='en-ie'>Ireland</option>
-                  <option value='de-de'>Germany</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-          <Row className='product-number mt-2'>
             <Col sm={2}>
               <Form.Label>
                 Products per page
