@@ -6,6 +6,7 @@ import { Container, Row, Col, Form, Button, Table, Pagination } from 'react-boot
 
 // Imports
 import axios from 'axios'
+import spinner from './assets/spinner.gif'
 
 // TODO
 // - spinner for loading 
@@ -221,7 +222,7 @@ const App = () => {
           </tbody>
         </>
       </Table>
-      {!products && !errors && <div className='messages'><p>Loading...</p></div>}
+      {!products && !errors && <div className='messages'><img src={spinner}/></div>}
       <div className='page-number'>
         <p>page {currentPage} of {totalPages}</p>
       </div>
