@@ -3,10 +3,10 @@
 
 A technical test for Attraction Tickets. Simple frontend that consumes the AT public API and allows navigation of products based on search criteria. 
 
-- search by product title
-- change region (updates pricing)
-- change number of products per page
-- results are paginated
+- Search by product title
+- Change region (updates pricing)
+- Change number of products per page
+- Results are paginated
 
 
 ## Installation
