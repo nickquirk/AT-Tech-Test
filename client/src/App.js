@@ -173,7 +173,7 @@ const App = () => {
             <Col className='d-flex align-items-center'>
               <Button type='submit'>Submit</Button>
             </Col>
-            <Col sm={2}>
+            <Col sm={2} className='products-label'>
               <Form.Label>
                 Products per page
               </Form.Label>

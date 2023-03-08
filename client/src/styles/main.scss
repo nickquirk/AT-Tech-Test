@@ -38,13 +38,15 @@
   img{
     max-width: 150px;
   }
-  .product-title{
-    
-  }
   .product-destination{
     //max-width: 200px;
   }
 }
+
+.products-label{
+    display: flex;
+    justify-content: flex-end;
+  }
 
 .product-image{
   max-width: 150px;
