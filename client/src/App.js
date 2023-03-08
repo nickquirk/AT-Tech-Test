@@ -57,7 +57,6 @@ const App = () => {
 
   // Call paginate function when relevant details change 
   useEffect(() => {
-    console.log('currentPage -> ', currentPage)
     generatePageNumbers()
   }, [currentPage, itemsPerPage, products])
 
@@ -107,8 +106,6 @@ const App = () => {
   // update form data with user input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
-    console.log('name ->', e.target.name)
-    console.log('value ->', e.target.value)
   }
 
   // Submit user input and call API 
@@ -161,7 +158,7 @@ const App = () => {
         <Form onSubmit={handleSubmit}>
           <Row>
             <Form.Group as={Row} className='search-form'>
-              <Col sm={2} className='form-title'>
+              <Col sm={2} className='label'>
                 <Form.Label>
                   Title
                 </Form.Label>
@@ -173,7 +170,7 @@ const App = () => {
             <Col className='d-flex align-items-center'>
               <Button type='submit'>Submit</Button>
             </Col>
-            <Col sm={2} className='products-label'>
+            <Col sm={2} className='label'>
               <Form.Label>
                 Products per page
               </Form.Label>
@@ -193,6 +190,9 @@ const App = () => {
           </Row>
         </Form>
       </Row>
+      {errors && <div className='messages'>
+        <p>Oops, looks like there&apos;s an error:</p> 
+        <div className='error'>{errorMessage}</div></div>}
       <Table striped hover className='mt-2'>
         <thead>
           <tr>
@@ -202,34 +202,26 @@ const App = () => {
             <th>Price from</th>
           </tr>
         </thead>
-        {products.data ? (
-          <>
-            <tbody>
-              {products.data.map(product => {
-                const { id, title, dest } = product
-                return (
-                  <tr key={id}>
-                    <td><img className='product-image' src={product.img_sml} /></td>
-                    <td>{title}</td>
-                    <td>{dest}</td>
-                    <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult !== '0.00' ? product.price_from_adult : 'N/A'}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </>
-        )
-          : errors ?
-            <div className='messages'>
-              <p>Oops, looks like there&apos;s an error...</p>
-              <p className='error'>{errorMessage}</p>
-            </div>
-            :
-            <div className='messages'>
-              <p>Loading...</p>
-            </div>
-        }
+        <>
+          <tbody>
+            {products.data ? products.data.map(product => {
+              const { id, title, dest } = product
+              return (
+                <tr key={id}>
+                  <td><img className='product-image' src={product.img_sml} /></td>
+                  <td>{title}</td>
+                  <td>{dest}</td>
+                  <td> {formData.region === 'en' ? '£' : '€'} {product.price_from_adult !== '0.00' ? product.price_from_adult : 'N/A'}</td>
+                </tr>
+              )
+            })
+              :
+              null
+            }
+          </tbody>
+        </>
       </Table>
+      {!products && !errors && <div className='messages'><p>Loading...</p></div>}
       <div className='page-number'>
         <p>page {currentPage} of {totalPages}</p>
       </div>
